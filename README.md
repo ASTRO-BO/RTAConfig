@@ -1,4 +1,4 @@
-BaseProject
-===========
+RTAConfig
+=========
 
-Base project for C++
+CTA configuration (e.g. telescope position, array type)
