@@ -1,8 +1,8 @@
 /***************************************************************************
-                          CTAConfig.cpp  -  description
-                             -------------------
-    copyright            : (C) 2014 Valentina Fioretti
-    email                : fioretti@iasfbo.inaf.it
+ RTAConfigLoad.cpp  -  description
+ -------------------
+ copyright            : (C) 2014 Valentina Fioretti
+ email                : fioretti@iasfbo.inaf.it
  ***************************************************************************/
 
 /***************************************************************************
@@ -13,12 +13,14 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "CTAConfig.h"
+#include <algorithm>
+
+#include "RTAConfigLoad.h"
 
 #define CONF_L0HEADER 1
 #define CONF_L1HEADER 2
 
-RTATelem::CTAConfig::CTAConfig(const string& confInputFileName) {
+RTAConfig::RTAConfigLoad::RTAConfigLoad(const string& confInputFileName) {
 	
 	try {
 		
@@ -28,14 +30,14 @@ RTATelem::CTAConfig::CTAConfig(const string& confInputFileName) {
 			conf_file.open(confInputFileName);
 			//conf_Nheader = conf_file.getHeadersNum();
             //cout << "Number of headers: " << conf_Nheader << endl;
- 						
+            
 			
             /// Moving to the Telescope level Header L0
             conf_file.moveToHeader(CONF_L0HEADER);
             
             /// Loading the number of rows
             conf_Nrows_L0 = conf_file.getNRows();
-           
+            
             /// Loading the data
             L0ID_colnum = conf_file.getColNum("L0ID");
             TelID_colnum = conf_file.getColNum("TelID");
@@ -64,31 +66,31 @@ RTATelem::CTAConfig::CTAConfig(const string& confInputFileName) {
 			vecTelID = conf_file.read16i(TelID_colnum, 0, conf_Nrows_L0-1);
 			vecTelType = conf_file.read64i(TelType_colnum, 0, conf_Nrows_L0-1);
 			vecTelX = conf_file.read32f(TelX_colnum, 0, conf_Nrows_L0-1);
-			vecTelY = conf_file.read32f(TelY_colnum, 0, conf_Nrows_L0-1);   
-			vecTelZ = conf_file.read32f(TelZ_colnum, 0, conf_Nrows_L0-1);   
-			vecFL = conf_file.read32f(FL_colnum, 0, conf_Nrows_L0-1);  
-			vecFOV = conf_file.read32f(FOV_colnum, 0, conf_Nrows_L0-1);  
-			vecCameraScaleFactor = conf_file.read32f(CameraScaleFactor_colnum, 0, conf_Nrows_L0-1);  
-			vecCameraCentreOffset = conf_file.read32f(CameraCentreOffset_colnum, 0, conf_Nrows_L0-1);  
-			vecCameraRotation = conf_file.read32f(CameraRotation_colnum, 0, conf_Nrows_L0-1);  
-			vecNPixel = conf_file.read16i(NPixel_colnum, 0, conf_Nrows_L0-1);  
-			vecNPixel_active = conf_file.read16i(NPixel_active_colnum, 0, conf_Nrows_L0-1);  
-			vecNSamples = conf_file.read16i(NSamples_colnum, 0, conf_Nrows_L0-1);  
-			vecSample_time_slice = conf_file.read32f(Sample_time_slice_colnum, 0, conf_Nrows_L0-1);  
-			vecNGains = conf_file.read16i(NGains_colnum, 0, conf_Nrows_L0-1);  
-			vecHiLoScale = conf_file.read32f(HiLoScale_colnum, 0, conf_Nrows_L0-1);  
-			vecHiLoThreshold = conf_file.read16i(HiLoThreshold_colnum, 0, conf_Nrows_L0-1);  
-			vecHiLoOffset = conf_file.read32f(HiLoOffset_colnum, 0, conf_Nrows_L0-1);  
-			vecNTubesOFF = conf_file.read16i(NTubesOFF_colnum, 0, conf_Nrows_L0-1);  
-			vecNMirrors = conf_file.read16i(NMirrors_colnum, 0, conf_Nrows_L0-1);  
+			vecTelY = conf_file.read32f(TelY_colnum, 0, conf_Nrows_L0-1);
+			vecTelZ = conf_file.read32f(TelZ_colnum, 0, conf_Nrows_L0-1);
+			vecFL = conf_file.read32f(FL_colnum, 0, conf_Nrows_L0-1);
+			vecFOV = conf_file.read32f(FOV_colnum, 0, conf_Nrows_L0-1);
+			vecCameraScaleFactor = conf_file.read32f(CameraScaleFactor_colnum, 0, conf_Nrows_L0-1);
+			vecCameraCentreOffset = conf_file.read32f(CameraCentreOffset_colnum, 0, conf_Nrows_L0-1);
+			vecCameraRotation = conf_file.read32f(CameraRotation_colnum, 0, conf_Nrows_L0-1);
+			vecNPixel = conf_file.read16i(NPixel_colnum, 0, conf_Nrows_L0-1);
+			vecNPixel_active = conf_file.read16i(NPixel_active_colnum, 0, conf_Nrows_L0-1);
+			vecNSamples = conf_file.read16i(NSamples_colnum, 0, conf_Nrows_L0-1);
+			vecSample_time_slice = conf_file.read32f(Sample_time_slice_colnum, 0, conf_Nrows_L0-1);
+			vecNGains = conf_file.read16i(NGains_colnum, 0, conf_Nrows_L0-1);
+			vecHiLoScale = conf_file.read32f(HiLoScale_colnum, 0, conf_Nrows_L0-1);
+			vecHiLoThreshold = conf_file.read16i(HiLoThreshold_colnum, 0, conf_Nrows_L0-1);
+			vecHiLoOffset = conf_file.read32f(HiLoOffset_colnum, 0, conf_Nrows_L0-1);
+			vecNTubesOFF = conf_file.read16i(NTubesOFF_colnum, 0, conf_Nrows_L0-1);
+			vecNMirrors = conf_file.read16i(NMirrors_colnum, 0, conf_Nrows_L0-1);
 			vecMirrorArea = conf_file.read32f(MirrorArea_colnum, 0, conf_Nrows_L0-1);
 			
 			/// Moving to the Pixel level Header L1
 			conf_file.moveToHeader(CONF_L1HEADER);
-			                        
+            
 			/// Loading the number of rows
 			conf_Nrows_L1 = conf_file.getNRows();
-			     
+            
 			/// Loading the data
 			L1ID_colnum = conf_file.getColNum("L1ID");
 			L0ID_L1_colnum = conf_file.getColNum("L0ID");
@@ -100,30 +102,30 @@ RTATelem::CTAConfig::CTAConfig(const string& confInputFileName) {
 			YTubeDeg_colnum = conf_file.getColNum("YTubeDeg");
 			RTubeDeg_colnum = conf_file.getColNum("RTubeDeg");
 			TubeOFF_colnum = conf_file.getColNum("TubeOFF");
-			          
+            
 			vecL1ID = conf_file.read64i(L1ID_colnum, 0, conf_Nrows_L1-1);
 			vecL0ID_L1 = conf_file.read64i(L0ID_L1_colnum, 0, conf_Nrows_L1-1);
 			vecPixelID = conf_file.read16i(PixelID_colnum, 0, conf_Nrows_L1-1);
 			vecXTubeMM = conf_file.read32f(XTubeMM_colnum, 0, conf_Nrows_L1-1);
-			vecYTubeMM = conf_file.read32f(YTubeMM_colnum, 0, conf_Nrows_L1-1);   
-			vecRTubeMM = conf_file.read32f(RTubeMM_colnum, 0, conf_Nrows_L1-1);  
+			vecYTubeMM = conf_file.read32f(YTubeMM_colnum, 0, conf_Nrows_L1-1);
+			vecRTubeMM = conf_file.read32f(RTubeMM_colnum, 0, conf_Nrows_L1-1);
 			vecXTubeDeg = conf_file.read32f(XTubeDeg_colnum, 0, conf_Nrows_L1-1);
-			vecYTubeDeg = conf_file.read32f(YTubeDeg_colnum, 0, conf_Nrows_L1-1);   
-			vecRTubeDeg = conf_file.read32f(RTubeDeg_colnum, 0, conf_Nrows_L1-1);  
-			vecTubeOFF = conf_file.read16i(TubeOFF_colnum, 0, conf_Nrows_L1-1);         
-
+			vecYTubeDeg = conf_file.read32f(YTubeDeg_colnum, 0, conf_Nrows_L1-1);
+			vecRTubeDeg = conf_file.read32f(RTubeDeg_colnum, 0, conf_Nrows_L1-1);
+			vecTubeOFF = conf_file.read16i(TubeOFF_colnum, 0, conf_Nrows_L1-1);
+            
 			
 			/// Setting the dummy array
 			array.ArrayID = 1;
 			array.NTel = conf_Nrows_L0;
-
-			/// Setting the Telescope structure objects							
+            
+			/// Setting the Telescope structure objects
 			for(int i=0; i<array.NTel; i++) {
 				temp_tel.TelID = vecTelID[i];
 				temp_tel.fromTeltoTelType.TelType = vecTelType[i];
 				temp_tel.TelX = vecTelX[i];
 				temp_tel.TelY = vecTelY[i];
-				temp_tel.TelZ = vecTelZ[i]; 
+				temp_tel.TelZ = vecTelZ[i];
 				telescope.push_back(temp_tel);
 			}
 			
@@ -141,22 +143,22 @@ RTATelem::CTAConfig::CTAConfig(const string& confInputFileName) {
 					pos = find(vecMirrorArea.begin(), vecMirrorArea.end(), vecUniqueMirrorArea[i]) - vecMirrorArea.begin();
 				}
 				vecUniqueTelType.push_back(vecTelType[pos]);
-			    vecUniqueFL.push_back(vecFL[pos]);  
-			    vecUniqueFOV.push_back(vecFOV[pos]);  
-			    vecUniqueCameraScaleFactor.push_back(vecCameraScaleFactor[pos]);  
-			    vecUniqueCameraCentreOffset.push_back(vecCameraCentreOffset[pos]);  
-			    vecUniqueCameraRotation.push_back(vecCameraRotation[pos]);  
-			    vecUniqueNTubesOFF.push_back(vecNTubesOFF[pos]);  
-			    vecUniqueNMirrors.push_back(vecNMirrors[pos]);  
-			    vecUniqueMirrorArea.push_back(vecMirrorArea[pos]);  
-			    vecUniqueNPixel.push_back(vecNPixel[pos]);  
-			    vecUniqueNPixel_active.push_back(vecNPixel_active[pos]); 
-			    vecUniqueNSamples.push_back(vecNSamples[pos]);  
-			    vecUniqueSample_time_slice.push_back(vecSample_time_slice[pos]);  
-			    vecUniqueNGains.push_back(vecNGains[pos]);  
-			    vecUniqueHiLoScale.push_back(vecHiLoScale[pos]);  
-			    vecUniqueHiLoThreshold.push_back(vecHiLoThreshold[pos]);  
-			    vecUniqueHiLoOffset.push_back(vecHiLoOffset[pos]); 
+			    vecUniqueFL.push_back(vecFL[pos]);
+			    vecUniqueFOV.push_back(vecFOV[pos]);
+			    vecUniqueCameraScaleFactor.push_back(vecCameraScaleFactor[pos]);
+			    vecUniqueCameraCentreOffset.push_back(vecCameraCentreOffset[pos]);
+			    vecUniqueCameraRotation.push_back(vecCameraRotation[pos]);
+			    vecUniqueNTubesOFF.push_back(vecNTubesOFF[pos]);
+			    vecUniqueNMirrors.push_back(vecNMirrors[pos]);
+			    vecUniqueMirrorArea.push_back(vecMirrorArea[pos]);
+			    vecUniqueNPixel.push_back(vecNPixel[pos]);
+			    vecUniqueNPixel_active.push_back(vecNPixel_active[pos]);
+			    vecUniqueNSamples.push_back(vecNSamples[pos]);
+			    vecUniqueSample_time_slice.push_back(vecSample_time_slice[pos]);
+			    vecUniqueNGains.push_back(vecNGains[pos]);
+			    vecUniqueHiLoScale.push_back(vecHiLoScale[pos]);
+			    vecUniqueHiLoThreshold.push_back(vecHiLoThreshold[pos]);
+			    vecUniqueHiLoOffset.push_back(vecHiLoOffset[pos]);
 			    
 			    for(int j=0; j<vecUniqueNPixel[i]; j++) {
 			    	vecUniquePixelID.push_back(vecPixelID[pos + j]);
@@ -182,7 +184,8 @@ RTATelem::CTAConfig::CTAConfig(const string& confInputFileName) {
 				temp_teltype.fromTelTypetoCamType.camType = i+1;
 				telescopeType.push_back(temp_teltype);
 			}
-
+            
+			/// Setting the MirrorType structure
 			for(int i=0; i<NTelType; i++) {
 				temp_mirtype.mirType = i+1;
 				temp_mirtype.FL =  vecUniqueFL[i];
@@ -193,7 +196,7 @@ RTATelem::CTAConfig::CTAConfig(const string& confInputFileName) {
 				mirrorType.push_back(temp_mirtype);
 			}
 			
-			
+			/// Setting the CameraType structure
 			int prevNPixel = 0;
 			for(int i=0; i<NTelType; i++) {
 				temp_camtype.camType = i+1;
@@ -203,23 +206,24 @@ RTATelem::CTAConfig::CTAConfig(const string& confInputFileName) {
 				temp_camtype.NPixel = vecUniqueNPixel[i];
 				temp_camtype.NPixel_active = vecUniqueNPixel_active[i];
 				temp_camtype.fromCameratoPixType.pixType = i+1;
-				 
+                
 				for(int j=0; j<temp_camtype.NPixel; j++) {
-					temp_pixel.PixelID = vecUniquePixelID[prevNPixel + j];					                  					
-					temp_pixel.XTubeMM = vecUniqueXTubeMM[prevNPixel + j];					                  					
+					temp_pixel.PixelID = vecUniquePixelID[prevNPixel + j];
+					temp_pixel.XTubeMM = vecUniqueXTubeMM[prevNPixel + j];
 					temp_pixel.YTubeMM = vecUniqueYTubeMM[prevNPixel + j];
 					temp_pixel.RTubeMM = vecUniqueRTubeMM[prevNPixel + j];
 					temp_pixel.XTubeDeg = vecUniqueXTubeDeg[prevNPixel + j];
 					temp_pixel.YTubeDeg = vecUniqueYTubeDeg[prevNPixel + j];
 					temp_pixel.RTubeDeg = vecUniqueRTubeDeg[prevNPixel + j];
 					temp_pixel.TubeOFF = vecUniqueTubeOFF[prevNPixel + j];
-					temp_camtype.fromCameratoPixel.push_back(temp_pixel);   
+					temp_camtype.fromCameratoPixel.push_back(temp_pixel);
 				}
-
+                
 				cameraType.push_back(temp_camtype);
-				prevNPixel = prevNPixel + temp_camtype.NPixel; 
-			}	
+				prevNPixel = prevNPixel + temp_camtype.NPixel;
+			}
 			
+			/// Setting the PixelType structure
 			for(int i=0; i<NTelType; i++) {
 				temp_pixtype.pixType = i+1;
 				temp_pixtype.NSamples =  vecUniqueNSamples[i];
@@ -233,31 +237,81 @@ RTATelem::CTAConfig::CTAConfig(const string& confInputFileName) {
 			
             
 		}
-
-
+        
+        
 	}
 	catch (qlbase::IOException& e) {
 		cout << "ERROR: File "<< confInputFileName <<" does not exist. Error code: " << e.getErrorCode() << endl;
 	}
 }
 
+struct RTAConfig::RTAConfigLoad::Array *RTAConfig::RTAConfigLoad::getArrayStruct() {
+	return &array;
+}
 
-struct RTATelem::CTAConfig::Telescope *RTATelem::CTAConfig::getTelescopeStruct(int TelID) {
-	struct Telescope *selTelescope;
+struct RTAConfig::RTAConfigLoad::Telescope *RTAConfig::RTAConfigLoad::getTelescopeStruct(int TelID) {
+	struct RTAConfig::RTAConfigLoad::Telescope *selTelescope;
 	for (int i=0; i<array.NTel; i++) {
     	if (telescope[i].TelID == TelID){
     		selTelescope = &telescope[i];
-    		break;                          
+    		break;
     	}
     }
 	
 	return selTelescope;
 }
 
+struct RTAConfig::RTAConfigLoad::TelescopeType *RTAConfig::RTAConfigLoad::getTelescopeTypeStruct(int TelType) {
+	struct RTAConfig::RTAConfigLoad::TelescopeType *selTelescopeType;
+	for (int i=0; i<NTelType; i++) {
+    	if (telescopeType[i].TelType == TelType){
+    		selTelescopeType = &telescopeType[i];
+    		break;
+    	}
+    }
+	
+	return selTelescopeType;
+}
 
-RTATelem::CTAConfig::~CTAConfig() {
+struct RTAConfig::RTAConfigLoad::MirrorType *RTAConfig::RTAConfigLoad::getMirrorTypeStruct(int mirType) {
+	struct RTAConfig::RTAConfigLoad::MirrorType *selMirrorType;
+	for (int i=0; i<NTelType; i++) {
+    	if (mirrorType[i].mirType == mirType){
+    		selMirrorType = &mirrorType[i];
+    		break;
+    	}
+    }
+	
+	return selMirrorType;
+}
+
+struct RTAConfig::RTAConfigLoad::CameraType *RTAConfig::RTAConfigLoad::getCameraTypeStruct(int camType) {
+	struct RTAConfig::RTAConfigLoad::CameraType *selCameraType;
+	for (int i=0; i<NTelType; i++) {
+    	if (cameraType[i].camType == camType){
+    		selCameraType = &cameraType[i];
+    		break;
+    	}
+    }
+	
+	return selCameraType;
+}
+
+struct RTAConfig::RTAConfigLoad::PixelType *RTAConfig::RTAConfigLoad::getPixelTypeStruct(int pixType) {
+	struct RTAConfig::RTAConfigLoad::PixelType *selPixelType;
+	for (int i=0; i<NTelType; i++) {
+    	if (pixelType[i].pixType == pixType){
+    		selPixelType = &pixelType[i];
+    		break;
+    	}
+    }
+	
+	return selPixelType;
+}
+
+RTAConfig::RTAConfigLoad::~RTAConfigLoad() {
 	conf_file.close();
-
+    
 }
 
 
