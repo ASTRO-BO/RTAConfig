@@ -1,15 +1,14 @@
 #############################################################################
-# Template: exe lib version 2013-10-08
+# Makefile for building: Project name
+# Project:  Project name
+# Template: lib and exe
 # Use make variable_name=' options ' to override the variables or make -e to
 # override the file variables with the environment variables
-# 		make CFLAGS='-g'
-#		make prefix='/usr'
-#		make CC=gcc-4.8
-# External environment variable. 
-#	Build: CPLUS_INCLUDE_PATH LIBRARY_PATH
-#	Execution: LD_LIBRARY_PATH DYLD_LIBRARY_PATH LOCAL  
+# 		make CFLAGS='-g' or make prefix='/usr'
 # Instructions:
 # - modify the section 1)
+# - if you want, modify the section 2) and 3), but it is not necessary
+# - modify the variables of the section 4): CFLAGS INCPATH ALL_CFLAGS CPPFLAGS LIBS
 # - in section 10), modify the following action:
 #		* all: and or remove exe and lib prerequisite
 #		* lib: and or remove staticlib and dynamiclib prerequisite
@@ -18,27 +17,25 @@
 #		* uninstall: add or remove the files and directories that should be uninstalled
 #############################################################################
 
-PROJECT= RTACoreIce1
 SHELL = /bin/sh
 
 ####### 1) Project names and system
 
-SYSTEM= $(shell gcc -dumpmachine)
-#ice, ctarta, mpi, cfitsio
-LINKERENV= ice, ctarta, cfitsio, root
-EXE_NAME1 = RTAReceiver_Ice
-EXE_NAME2 = RTAWave
-LIB_NAME = 
+#SYSTEM: linux or QNX
+SYSTEM = linux
+PROJECT= RTAConfig
+EXE_NAME = RTAConfig
+LIB_NAME = libRTAconfig
 VER_FILE_NAME = version.h
 #the name of the directory where the conf file are copied (into $(datadir))
-CONF_DEST_DIR = RTACoreIce1
+CONF_DEST_DIR = 
 #the name of the icon for the installation
 ICON_NAME=
 
 ####### 2) Directories for the installation
 
 # Prefix for each installed program. Only ABSOLUTE PATH
-prefix=$(LOCAL)
+prefix=/usr/local
 exec_prefix=$(prefix)
 # The directory to install the binary files in.
 bindir=$(exec_prefix)/bin
@@ -62,63 +59,30 @@ DOC_DIR = ref
 DOXY_SOURCE_DIR = code_filtered
 EXE_DESTDIR  = .
 LIB_DESTDIR = lib
-CONF_DIR= conf
+CONF_DIR=conf
 ICON_DIR = ui
 
 ####### 4) Compiler, tools and options
 
-ifneq (, $(findstring mpi, $(LINKERENV)))
-CC       = mpic++
-else
-CC       = gcc
-endif
-
-#Set INCPATH to add the inclusion paths
-INCPATH = -I $(INCLUDE_DIR) 
-LIBS = -lstdc++
+CC       = g++
+CXX      = g++
 #Insert the optional parameter to the compiler. The CFLAGS could be changed externally by the user
-CFLAGS   = -g
+CFLAGS   = -m64 -O2
+#Set INCPATH to add the inclusion paths
+INCPATH = -I ./include -I $(CTARTA)/include -L$(CTARTA)/lib
 #Insert the implicit parameter to the compiler:
-ALL_CFLAGS = -m64 -fexceptions -Wall $(CFLAGS) $(INCPATH)
-#Use CPPFLAGS for the preprocessor
-CPPFLAGS =
-
-ifneq (, $(findstring cfitsio, $(LINKERENV)))
-	LIBS += -lcfitsio
-endif
-ifneq (, $(findstring ctarta, $(LINKERENV)))
-	LIBS += -lpacket -lRTAtelem
-endif
-ifneq (, $(findstring root, $(LINKERENV)))
-        ROOTCFLAGS   := $(shell root-config --cflags)
-	ROOTLIBS     := $(shell root-config --libs)
-	ROOTGLIBS    := $(shell root-config --glibs)
-	ROOTCONF=-O -pipe -Wall -W -fPIC -D_REENTRANT
-	LIBS += $(ROOTGLIBS) -lMinuit
-	ALL_CFLAGS += $(ROOTCONF)
-endif
-
-#Set addition parameters that depends by operating system
-
-ifneq (, $(findstring linux, $(SYSTEM)))
- 	#Do linux things
-	ifneq (, $(findstring ice, $(LINKERENV)))
-		LIBS += -lIce -lIceUtil -lFreeze
-	endif
-endif
-ifneq (, $(findstring qnx, $(SYSTEM)))
-    # Do qnx things
+ALL_CFLAGS = -fexceptions -Wall $(INCPATH) $(CFLAGS)
+ifeq ($(SYSTEM), QNX)
 	ALL_CFLAGS += -Vgcc_ntox86_gpp -lang-c++
+endif
+#Use CPPFLAGS for the preprocessor
+CPPFLAGS =  -m64 
+#Set LIBS for addition library
+LIBS = $(INCPATH) -lstdc++  -lpacket
+ifeq ($(SYSTEM), QNX)
 	LIBS += -lsocket
 endif
-ifneq (, $(findstring apple, $(SYSTEM)))
- 	# Do apple things
-	ifneq (, $(findstring ice, $(LINKERENV)))
-                LIBS += -lZerocIce -lZerocIceUtil -lFreeze
-        endif
-endif 
-
-LINK     = $CC
+LINK     = g++
 #for link
 LFLAGS = -shared -Wl,-soname,$(TARGET1) -Wl,-rpath,$(DESTDIR)
 AR       = ar cqs
@@ -152,7 +116,7 @@ DOC_SOURCE= $(addprefix $(DOXY_SOURCE_DIR)/, $(notdir $(SOURCE)))
 
 ####### 7) Only for library generation
 
-TARGET  = $(LIB_NAME).so.$(shell cat version)
+TARGET   = $(LIB_NAME).so.$(shell cat version)
 TARGETA	= $(LIB_NAME).a
 TARGETD	= $(LIB_NAME).so.$(shell cat version)
 TARGET0	= $(LIB_NAME).so
@@ -182,15 +146,15 @@ $(DOXY_SOURCE_DIR)/%.cpp : %.cpp
 ####### 10) Build rules
 
 #all: compile the entire program.
-all: exe
+all:  lib
 		#only if conf directory is present:
 		#$(SYMLINK) $(CONF_DIR) $(CONF_DEST_DIR)
 
-lib: staticlib 
+lib:  staticlib 
 	
 exe: makeobjdir $(OBJECTS)
 		test -d $(EXE_DESTDIR) || mkdir -p $(EXE_DESTDIR)
-		$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME1) $(OBJECTS_DIR)/*.o $(LIBS)
+		$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME) $(OBJECTS_DIR)/*.o $(LIBS)
 	
 staticlib: makelibdir makeobjdir $(OBJECTS)	
 		test -d $(LIB_DESTDIR) || mkdir -p $(LIB_DESTDIR)	
@@ -221,8 +185,7 @@ clean:
 	$(DEL_FILE) *~ core *.core
 	$(DEL_FILE) $(LIB_DESTDIR)/*.a
 	$(DEL_FILE) $(LIB_DESTDIR)/*.so*
-	$(DEL_FILE) $(EXE_DESTDIR)/$(EXE_NAME1)	
-	$(DEL_FILE) $(EXE_DESTDIR)/$(EXE_NAME2)
+	$(DEL_FILE) $(EXE_DESTDIR)/$(EXE_NAME)	
 	$(DEL_FILE) version
 	$(DEL_FILE) prefix
 	$(DEL_FILE) $(PROJECT).dvi
@@ -242,29 +205,27 @@ distclean: clean
 #and so on to the file names where they should reside for actual use. 
 install: all
 	$(shell echo $(prefix) > prefix)
+	test -d $(datadir)/$(CONF_DEST_DIR) || mkdir -p $(datadir)/$(CONF_DEST_DIR)
 	#test -d $(infodir) || mkdir -p $(infodir)	
 
 	# For library installation
-	#test -d $(libdir) || mkdir -p $(libdir)
-	#test -d $(includedir) || mkdir -p $(includedir)	
-	#$(COPY_FILE) $(LIB_DESTDIR)/$(TARGETA) $(libdir)
+	test -d $(libdir) || mkdir -p $(libdir)
+	test -d $(includedir) || mkdir -p $(includedir)	
+	$(COPY_FILE) $(LIB_DESTDIR)/$(TARGETA) $(libdir)
 	#$(COPY_FILE) $(LIB_DESTDIR)/$(TARGET0) $(libdir)
 	#$(COPY_FILE) $(LIB_DESTDIR)/$(TARGET1) $(libdir)
 	#$(COPY_FILE) $(LIB_DESTDIR)/$(TARGET2) $(libdir)
 	#$(COPY_FILE) $(LIB_DESTDIR)/$(TARGETD) $(libdir)
-	#$(COPY_FILE) $(INCLUDE) $(includedir)
+	$(COPY_FILE) $(INCLUDE) $(includedir)
 	
 	# For exe installation
-	test -d $(bindir) || mkdir -p $(bindir)	
-	$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME1) $(bindir)
-	$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME2) $(bindir)
-	
+	#test -d $(bindir) || mkdir -p $(bindir)	
+	#$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME) $(bindir)
 	#copy icon
 	#test -d $(icondir) || mkdir -p $(icondir)
 	#$(COPY_FILE) $(ICON_DIR)/$(ICON_NAME) $(icondir)
 
 	# For conf files installation
-	test -d $(datadir)/$(CONF_DEST_DIR) || mkdir -p $(datadir)/$(CONF_DEST_DIR)
 	$(COPY_FILE) $(CONF_DIR)/* $(datadir)/$(CONF_DEST_DIR)
 
 
