@@ -208,6 +208,7 @@ namespace RTAConfig {
         struct Array {
             int16_t ArrayID;
             int16_t NTel;
+            vector<int16_t> vecTelID;
         };
         
         /// structure declaration

@@ -118,7 +118,8 @@ RTAConfig::RTAConfigLoad::RTAConfigLoad(const string& confInputFileName) {
 			/// Setting the dummy array
 			array.ArrayID = 1;
 			array.NTel = conf_Nrows_L0;
-            
+			array.vecTelID = vecTelID;
+
 			/// Setting the Telescope structure objects
 			for(int i=0; i<array.NTel; i++) {
 				temp_tel.TelID = vecTelID[i];
