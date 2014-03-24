@@ -289,9 +289,8 @@ struct RTAConfig::RTAConfigLoad::Telescope *RTAConfig::RTAConfigLoad::getTelesco
 	for (int i=0; i<array.NTel; i++) {
     	if (telescope[i].TelID == TelID){
     		return &telescope[i];
-    	}
+    	} 
     }
-    return 0;
 }
 
 struct RTAConfig::RTAConfigLoad::TelescopeType *RTAConfig::RTAConfigLoad::getTelescopeTypeStruct(int TelType) {
@@ -300,7 +299,7 @@ struct RTAConfig::RTAConfigLoad::TelescopeType *RTAConfig::RTAConfigLoad::getTel
     		return &telescopeType[i];
     	}
     }
-    return 0;
+    //return 0;
 }
 
 struct RTAConfig::RTAConfigLoad::MirrorType *RTAConfig::RTAConfigLoad::getMirrorTypeStruct(int mirType) {
@@ -309,7 +308,7 @@ struct RTAConfig::RTAConfigLoad::MirrorType *RTAConfig::RTAConfigLoad::getMirror
     		return &mirrorType[i];
     	}
     }
-    return 0;
+    //return 0;
 }
 
 struct RTAConfig::RTAConfigLoad::CameraType *RTAConfig::RTAConfigLoad::getCameraTypeStruct(int camType) {
@@ -318,7 +317,7 @@ struct RTAConfig::RTAConfigLoad::CameraType *RTAConfig::RTAConfigLoad::getCamera
     		return &cameraType[i];
     	}
     }
-    return 0;
+    //return 0;
 }
 
 struct RTAConfig::RTAConfigLoad::PixelType *RTAConfig::RTAConfigLoad::getPixelTypeStruct(int pixType) {
@@ -327,7 +326,7 @@ struct RTAConfig::RTAConfigLoad::PixelType *RTAConfig::RTAConfigLoad::getPixelTy
     		return &pixelType[i];
     	}
     }
-    return 0;
+    //return 0;
 }
 
 struct RTAConfig::RTAConfigLoad::Pixel *RTAConfig::RTAConfigLoad::getPixelStruct(int camType, int pixelID) {
@@ -337,7 +336,7 @@ struct RTAConfig::RTAConfigLoad::Pixel *RTAConfig::RTAConfigLoad::getPixelStruct
     	    return &pixels[i][pixelID];
     	}
     }
-    return 0;
+    //return 0;
 }
 
 RTAConfig::RTAConfigLoad::~RTAConfigLoad() {
