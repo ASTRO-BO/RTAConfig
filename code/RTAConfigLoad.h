@@ -215,6 +215,7 @@ namespace RTAConfig {
         struct PixelType temp_pixtype;
         vector<PixelType> pixelType;
         struct Pixel temp_pixel;
+        vector< vector<Pixel> > pixels;
         struct CameraType temp_camtype;
         vector<CameraType> cameraType;
         struct MirrorType temp_mirtype;
@@ -242,6 +243,9 @@ namespace RTAConfig {
         
         /// It gets the pixel structure from the pixel type identification number
         struct RTAConfig::RTAConfigLoad::PixelType *getPixelTypeStruct(int pixType);
+
+        /// It gets the pixel structure from the pixel type identification number
+        struct RTAConfig::RTAConfigLoad::Pixel *getPixelStruct(int camType, int pixelID);
         
     };
 }

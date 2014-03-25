@@ -143,6 +143,8 @@ RTAConfig::RTAConfigLoad::RTAConfigLoad(const string& confInputFileName) {
 				while (pos < 0){
 					pos = find(vecMirrorArea.begin(), vecMirrorArea.end(), vecUniqueMirrorArea[i]) - vecMirrorArea.begin();
 				}
+				
+				cout << "pos" << pos << endl;
 				vecUniqueTelType.push_back(vecTelType[pos]);
 			    vecUniqueFL.push_back(vecFL[pos]);
 			    vecUniqueFOV.push_back(vecFOV[pos]);
@@ -160,17 +162,41 @@ RTAConfig::RTAConfigLoad::RTAConfigLoad(const string& confInputFileName) {
 			    vecUniqueHiLoScale.push_back(vecHiLoScale[pos]);
 			    vecUniqueHiLoThreshold.push_back(vecHiLoThreshold[pos]);
 			    vecUniqueHiLoOffset.push_back(vecHiLoOffset[pos]);
+			}
+
+            int where_L0ID;
+            int i = 0;
+            int count_tel = 0;
+		    while (count_tel < NTelType){
+			    where_L0ID = find(vecTelType.begin(), vecTelType.end(), vecUniqueTelType[count_tel]) - vecTelType.begin();
+			    int temp_L0ID = vecL0ID[where_L0ID];
+                for(unsigned int iL0=0; iL0<vecL0ID_L1.size(); iL0++) {
+                    if (vecL0ID_L1[iL0] == temp_L0ID){
+                        i = iL0;
+                        break;
+                    }
+                }
+
+			    int temp_Npixel = vecNPixel[where_L0ID];
 			    
-			    for(int j=0; j<vecUniqueNPixel[i]; j++) {
-			    	vecUniquePixelID.push_back(vecPixelID[pos + j]);
-			    	vecUniqueXTubeMM.push_back(vecXTubeMM[pos + j]);
-			    	vecUniqueYTubeMM.push_back(vecYTubeMM[pos + j]);
-			    	vecUniqueRTubeMM.push_back(vecRTubeMM[pos + j]);
-			    	vecUniqueXTubeDeg.push_back(vecXTubeDeg[pos + j]);
-			    	vecUniqueYTubeDeg.push_back(vecYTubeDeg[pos + j]);
-			    	vecUniqueRTubeDeg.push_back(vecRTubeDeg[pos + j]);
-			    	vecUniqueTubeOFF.push_back(vecTubeOFF[pos + j]);
+			    for(int j=i; j<(i+temp_Npixel); j++) {
+			    	vecUniquePixelID.push_back(vecPixelID[j]);
+			    	vecUniqueXTubeMM.push_back(vecXTubeMM[j]);
+			    	vecUniqueYTubeMM.push_back(vecYTubeMM[j]);
+			    	vecUniqueRTubeMM.push_back(vecRTubeMM[j]);
+			    	vecUniqueXTubeDeg.push_back(vecXTubeDeg[j]);
+			    	vecUniqueYTubeDeg.push_back(vecYTubeDeg[j]);
+			    	vecUniqueRTubeDeg.push_back(vecRTubeDeg[j]);
+			    	vecUniqueTubeOFF.push_back(vecTubeOFF[j]); 
 			    }
+			    count_tel++;
+			}
+
+			
+			for (unsigned int i=0; i<vecUniqueRTubeDeg.size(); i++){
+			
+			  cout << vecUniqueRTubeDeg[i] << endl;
+			
 			}
 			
 			/// The telescopes size increases as the index in the vector increases
@@ -199,6 +225,7 @@ RTAConfig::RTAConfigLoad::RTAConfigLoad(const string& confInputFileName) {
 			
 			/// Setting the CameraType structure
 			int prevNPixel = 0;
+            pixels.resize(NTelType);
 			for(int i=0; i<NTelType; i++) {
 				temp_camtype.camType = i+1;
 				temp_camtype.CameraScaleFactor = vecUniqueCameraScaleFactor[i];
@@ -208,7 +235,10 @@ RTAConfig::RTAConfigLoad::RTAConfigLoad(const string& confInputFileName) {
 				temp_camtype.NPixel_active = vecUniqueNPixel_active[i];
 				temp_camtype.fromCameratoPixType.pixType = i+1;
                 
-				for(int j=0; j<temp_camtype.NPixel; j++) {
+                //vector<Pixel> colPixel;
+                //colPixel.resize(0)
+                pixels[i].resize(vecUniqueNPixel[i]);					
+				for(int j=0; j<vecUniqueNPixel[i]; j++) {
 					temp_pixel.PixelID = vecUniquePixelID[prevNPixel + j];
 					temp_pixel.XTubeMM = vecUniqueXTubeMM[prevNPixel + j];
 					temp_pixel.YTubeMM = vecUniqueYTubeMM[prevNPixel + j];
@@ -218,10 +248,15 @@ RTAConfig::RTAConfigLoad::RTAConfigLoad(const string& confInputFileName) {
 					temp_pixel.RTubeDeg = vecUniqueRTubeDeg[prevNPixel + j];
 					temp_pixel.TubeOFF = vecUniqueTubeOFF[prevNPixel + j];
 					temp_camtype.fromCameratoPixel.push_back(temp_pixel);
-				}
-                
+					pixels[i][j] = temp_pixel;
+					
+					cout << vecUniquePixelID[prevNPixel + j] << " " <<  vecUniqueRTubeDeg[prevNPixel + j] << endl;
+					cout << prevNPixel + j << endl;
+					}
+    			prevNPixel = prevNPixel + vecUniqueNPixel[i];
+            
 				cameraType.push_back(temp_camtype);
-				prevNPixel = prevNPixel + temp_camtype.NPixel;
+				
 			}
 			
 			/// Setting the PixelType structure
@@ -251,63 +286,57 @@ struct RTAConfig::RTAConfigLoad::Array *RTAConfig::RTAConfigLoad::getArrayStruct
 }
 
 struct RTAConfig::RTAConfigLoad::Telescope *RTAConfig::RTAConfigLoad::getTelescopeStruct(int TelID) {
-	struct RTAConfig::RTAConfigLoad::Telescope *selTelescope;
 	for (int i=0; i<array.NTel; i++) {
     	if (telescope[i].TelID == TelID){
-    		selTelescope = &telescope[i];
-    		break;
-    	}
+    		return &telescope[i];
+    	} 
     }
-	
-	return selTelescope;
 }
 
 struct RTAConfig::RTAConfigLoad::TelescopeType *RTAConfig::RTAConfigLoad::getTelescopeTypeStruct(int TelType) {
-	struct RTAConfig::RTAConfigLoad::TelescopeType *selTelescopeType;
 	for (int i=0; i<NTelType; i++) {
     	if (telescopeType[i].TelType == TelType){
-    		selTelescopeType = &telescopeType[i];
-    		break;
+    		return &telescopeType[i];
     	}
     }
-	
-	return selTelescopeType;
+    //return 0;
 }
 
 struct RTAConfig::RTAConfigLoad::MirrorType *RTAConfig::RTAConfigLoad::getMirrorTypeStruct(int mirType) {
-	struct RTAConfig::RTAConfigLoad::MirrorType *selMirrorType;
 	for (int i=0; i<NTelType; i++) {
     	if (mirrorType[i].mirType == mirType){
-    		selMirrorType = &mirrorType[i];
-    		break;
+    		return &mirrorType[i];
     	}
     }
-	
-	return selMirrorType;
+    //return 0;
 }
 
 struct RTAConfig::RTAConfigLoad::CameraType *RTAConfig::RTAConfigLoad::getCameraTypeStruct(int camType) {
-	struct RTAConfig::RTAConfigLoad::CameraType *selCameraType;
 	for (int i=0; i<NTelType; i++) {
     	if (cameraType[i].camType == camType){
-    		selCameraType = &cameraType[i];
-    		break;
+    		return &cameraType[i];
     	}
     }
-	
-	return selCameraType;
+    //return 0;
 }
 
 struct RTAConfig::RTAConfigLoad::PixelType *RTAConfig::RTAConfigLoad::getPixelTypeStruct(int pixType) {
-	struct RTAConfig::RTAConfigLoad::PixelType *selPixelType;
 	for (int i=0; i<NTelType; i++) {
     	if (pixelType[i].pixType == pixType){
-    		selPixelType = &pixelType[i];
-    		break;
+    		return &pixelType[i];
     	}
     }
-	
-	return selPixelType;
+    //return 0;
+}
+
+struct RTAConfig::RTAConfigLoad::Pixel *RTAConfig::RTAConfigLoad::getPixelStruct(int camType, int pixelID) {
+	//vector<struct RTAConfig::RTAConfigLoad::Pixel> *selPixel;
+	for (int i=0; i<NTelType; i++) {
+    	if (cameraType[i].camType == camType){    	
+    	    return &pixels[i][pixelID];
+    	}
+    }
+    //return 0;
 }
 
 RTAConfig::RTAConfigLoad::~RTAConfigLoad() {
