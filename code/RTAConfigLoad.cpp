@@ -144,7 +144,6 @@ RTAConfig::RTAConfigLoad::RTAConfigLoad(const string& confInputFileName) {
 					pos = find(vecMirrorArea.begin(), vecMirrorArea.end(), vecUniqueMirrorArea[i]) - vecMirrorArea.begin();
 				}
 				
-				cout << "pos" << pos << endl;
 				vecUniqueTelType.push_back(vecTelType[pos]);
 			    vecUniqueFL.push_back(vecFL[pos]);
 			    vecUniqueFOV.push_back(vecFOV[pos]);
@@ -193,12 +192,6 @@ RTAConfig::RTAConfigLoad::RTAConfigLoad(const string& confInputFileName) {
 			}
 
 			
-			for (unsigned int i=0; i<vecUniqueRTubeDeg.size(); i++){
-			
-			  cout << vecUniqueRTubeDeg[i] << endl;
-			
-			}
-			
 			/// The telescopes size increases as the index in the vector increases
 			
 			//cout << "Small telescope: " << vecUniqueTelType[0] << endl;
@@ -235,8 +228,6 @@ RTAConfig::RTAConfigLoad::RTAConfigLoad(const string& confInputFileName) {
 				temp_camtype.NPixel_active = vecUniqueNPixel_active[i];
 				temp_camtype.fromCameratoPixType.pixType = i+1;
                 
-                //vector<Pixel> colPixel;
-                //colPixel.resize(0)
                 pixels[i].resize(vecUniqueNPixel[i]);					
 				for(int j=0; j<vecUniqueNPixel[i]; j++) {
 					temp_pixel.PixelID = vecUniquePixelID[prevNPixel + j];
@@ -249,9 +240,6 @@ RTAConfig::RTAConfigLoad::RTAConfigLoad(const string& confInputFileName) {
 					temp_pixel.TubeOFF = vecUniqueTubeOFF[prevNPixel + j];
 					temp_camtype.fromCameratoPixel.push_back(temp_pixel);
 					pixels[i][j] = temp_pixel;
-					
-					cout << vecUniquePixelID[prevNPixel + j] << " " <<  vecUniqueRTubeDeg[prevNPixel + j] << endl;
-					cout << prevNPixel + j << endl;
 					}
     			prevNPixel = prevNPixel + vecUniqueNPixel[i];
             
