@@ -1,7 +1,7 @@
-2013-09-30 Andrea Bulgarelli <bulgarelli@iasfbo.inaf.it>
+2014-04-24 Valentina Fioretti <fioretti@iasfbo.inaf.it>, Andrea Bulgarelli <bulgarelli@iasfbo.inaf.it>
 TAG v1.0.0
-
-* change 1
-* change 2
-   ** subchange 2.1
-   ** subchange 2.2
+	* PixelID and position bug correction.
+	* Added xcode files.
+	* Array of telescope IDs added in the array struct.
+	* RTAConfigLoad class created.
+	* Creation of RTAConfig.
